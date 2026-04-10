@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>App Frequência QR</title>
+</head>
+<body>
+
+<h2>Leitor de Frequência</h2>
+
+<input type="text" id="matricula" placeholder="Digite ou cole a matrícula">
+<button onclick="enviar()">Registrar</button>
+
+<p id="nomeAluno"></p>
+
+<script>
+const baseURL = "COLE_SUA_URL_DO_APPS_SCRIPT_AQUI";
+
+async function enviar() {
+  const matricula = document.getElementById("matricula").value;
+
+  if (!matricula) {
+    alert("Informe a matrícula");
+    return;
+  }
+
+  try {
+    // Buscar aluno
+    const res = await fetch(`${baseURL}?action=buscarAluno&matricula=${matricula}`);
+    const aluno = await res.json();
+
+    if (!aluno.encontrado) {
+      alert("Aluno não encontrado!");
+      return;
+    }
+
+    document.getElementById("nomeAluno").innerText = "Aluno: " + aluno.nome;
+
+    // Registrar presença
+    const registro = await fetch(`${baseURL}?action=registrar&matricula=${matricula}`);
+    const resultado = await registro.text();
+
+    if (resultado === "OK") {
+      alert("Presença registrada com sucesso!");
+    } else {
+      alert(resultado);
+    }
+
+  } catch (e) {
+    alert("Erro de conexão");
+  }
+}
+</script>
+
+</body>
+</html>

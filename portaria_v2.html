@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>📚 Frequência Escolar – Portaria</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+<style>
+  :root {
+    --verde: #2e7d32; --verde-claro: #4caf50; --azul: #1565c0;
+    --laranja: #e65100; --cinza: #f5f5f5; --branco: #ffffff;
+    --sombra: 0 4px 20px rgba(0,0,0,0.12);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Tahoma, sans-serif; background: linear-gradient(135deg, #e8f5e9 0%, #e3f2fd 100%); min-height: 100vh; }
+  header { background: linear-gradient(90deg, var(--verde) 0%, var(--azul) 100%); color: white; padding: 16px 20px; text-align: center; box-shadow: var(--sombra); }
+  header h1 { font-size: 1.3rem; font-weight: 700; }
+  header p { font-size: 0.82rem; opacity: 0.88; margin-top: 4px; }
+  .container { max-width: 480px; margin: 0 auto; padding: 16px; }
+  .card { background: white; border-radius: 14px; padding: 18px; margin-bottom: 16px; box-shadow: var(--sombra); }
+  .card h2 { font-size: 0.95rem; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+  .card-config h2 { color: var(--azul); }
+  .card-cadastro h2 { color: var(--laranja); }
+  .card-scanner h2 { color: var(--verde); }
+  label { font-size: 0.82rem; color: #555; font-weight: 600; display: block; margin-bottom: 4px; }
+  input, select { width: 100%; padding: 10px 12px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 0.9rem; margin-bottom: 10px; background: #fafafa; }
+  input:focus, select:focus { outline: none; border-color: var(--azul); background: white; }
+  .btn { display: block; width: 100%; padding: 13px; border: none; border-radius: 10px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+  .btn-green { background: var(--verde-claro); color: white; }
+  .btn-green:hover { background: var(--verde); }
+  .btn-red { background: #ef5350; color: white; }
+  .btn-red:hover { background: #c62828; }
+  .btn-blue { background: var(--azul); color: white; }
+  .btn-blue:hover { background: #0d47a1; }
+  .btn-orange { background: var(--laranja); color: white; }
+  .btn-orange:hover { background: #bf360c; }
+  .btn:disabled { opacity: 0.5; cursor: default; }
+  .btn-load { background: linear-gradient(90deg, var(--verde-claro), var(--azul)); color: white; border: none; padding: 10px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer; width: 100%; margin-top: 4px; }
+  .btn-load:hover { opacity: 0.9; }
+  .manual-row { display: flex; gap: 8px; margin-top: 10px; }
+  .manual-row input { margin-bottom: 0; flex: 1; }
+  .manual-row button { white-space: nowrap; padding: 10px 16px; border-radius: 8px; background: var(--azul); color: white; border: none; font-weight: 700; cursor: pointer; font-size: 0.88rem; }
+  .feedback { border-radius: 12px; padding: 14px 16px; margin-bottom: 16px; font-size: 0.92rem; font-weight: 600; display: none; align-items: center; gap: 10px; animation: slideIn 0.3s ease; }
+  @keyframes slideIn { from { opacity:0; transform: translateY(-10px); } to { opacity:1; transform: translateY(0); } }
+  .feedback.ok { background: #e8f5e9; border: 2px solid #a5d6a7; color: #1b5e20; display: flex; }
+  .feedback.err { background: #ffebee; border: 2px solid #ef9a9a; color: #b71c1c; display: flex; }
+  .feedback.dup { background: #fff8e1; border: 2px solid #ffe082; color: #e65100; display: flex; }
+  .feedback.info { background: #e3f2fd; border: 2px solid #90caf9; color: #0d47a1; display: flex; }
+  .feedback-icon { font-size: 1.5rem; }
+  .stats-bar { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+  .stat-box { background: white; border-radius: 12px; padding: 12px 10px; text-align: center; box-shadow: var(--sombra); }
+  .stat-box .num { font-size: 1.6rem; font-weight: 800; }
+  .stat-box .lbl { font-size: 0.72rem; color: #888; margin-top: 2px; }
+  .stat-presentes .num { color: var(--verde); }
+  .stat-hoje .num { color: var(--azul); }
+  .stat-hora .num { color: var(--laranja); font-size: 1.1rem; }
+  .log-card { background: white; border-radius: 14px; padding: 18px; box-shadow: var(--sombra); margin-bottom: 16px; }
+  .log-card h2 { font-size: 0.95rem; color: #555; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+  .log-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .badge-count { background: var(--verde-claro); color: white; border-radius: 20px; padding: 3px 12px; font-size: 0.8rem; font-weight: 700; }
+  .log-item { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 8px; margin-bottom: 6px; background: #f9f9f9; border-left: 4px solid var(--verde-claro); font-size: 0.84rem; }
+  .log-item .log-avatar { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1rem; font-weight: 700; flex-shrink: 0; background: linear-gradient(135deg, var(--verde-claro), var(--azul)); color: white; }
+  .log-name { font-weight: 700; color: #333; }
+  .log-meta { color: #888; font-size: 0.78rem; }
+  .log-time { margin-left: auto; font-size: 0.82rem; color: var(--azul); font-weight: 600; }
+  .log-empty { text-align: center; color: #aaa; padding: 20px; font-size: 0.88rem; }
+  .export-row { display: flex; gap: 8px; margin-top: 10px; }
+  .export-row button { flex: 1; padding: 11px; border-radius: 9px; border: none; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+  .btn-export-csv { background: #e3f2fd; color: var(--azul); }
+  .btn-export-csv:hover { background: var(--azul); color: white; }
+  .btn-clear { background: #ffebee; color: #c62828; }
+  .btn-clear:hover { background: #c62828; color: white; }
+  #reader { border-radius: 10px; overflow: hidden; margin-bottom: 12px; border: 3px solid var(--verde-claro); background: #111; }
+  .tabs { display: flex; gap: 4px; margin-bottom: 16px; }
+  .tab { flex: 1; padding: 12px; border: none; border-radius: 10px; font-weight: 700; font-size: 0.88rem; cursor: pointer; transition: all 0.2s; background: white; color: #888; box-shadow: var(--sombra); }
+  .tab.active { color: white; }
+  .tab.tab-freq.active { background: var(--verde-claro); }
+  .tab.tab-cad.active { background: var(--laranja); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .alunos-status { font-size: 0.78rem; padding: 6px 10px; border-radius: 6px; margin-top: 6px; margin-bottom: 8px; }
+  .alunos-lista { max-height: 200px; overflow-y: auto; margin-top: 10px; }
+  .aluno-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; border-radius: 8px; margin-bottom: 4px; background: #f9f9f9; font-size: 0.82rem; border-left: 3px solid var(--azul); }
+  .aluno-item .nome { font-weight: 600; color: #333; }
+  .aluno-item .info { color: #888; font-size: 0.75rem; }
+  footer { text-align: center; padding: 14px; font-size: 0.75rem; color: #999; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📚 Sistema de Frequência Escolar</h1>
+  <p>SEMED / Junqueiro · v3.0</p>
+</header>
+
+<div class="container">
+
+  <!-- Config -->
+  <div class="card card-config">
+    <h2>⚙️ Configuração</h2>
+    <label>URL do Google Apps Script</label>
+    <input type="url" id="scriptUrl" placeholder="Cole aqui a URL do Apps Script..." style="font-size:0.78rem;">
+    <div id="urlStatus" style="font-size:0.75rem;color:#888;margin-top:-6px;margin-bottom:8px;">⚠️ Cole a URL para ativar a integração.</div>
+    <button class="btn-load" onclick="carregarAlunosDaPlanilha()">🔄 Carregar Alunos da Planilha</button>
+    <div id="alunosStatus" class="alunos-status" style="display:none;"></div>
+    <label style="margin-top:8px;">Turno</label>
+    <select id="turno">
+      <option value="Manhã">🌅 Manhã</option>
+      <option value="Tarde">🌇 Tarde</option>
+      <option value="Noite">🌙 Noite</option>
+    </select>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab tab-freq active" onclick="switchTab('frequencia')">✅ Frequência</button>
+    <button class="tab tab-cad" onclick="switchTab('cadastro')">👤 Cadastrar Aluno</button>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-bar">
+    <div class="stat-box stat-presentes"><div class="num" id="statTotal">0</div><div class="lbl">Registros Hoje</div></div>
+    <div class="stat-box stat-hoje"><div class="num" id="statData">--/--</div><div class="lbl">Data</div></div>
+    <div class="stat-box stat-hora"><div class="num" id="statHora">00:00</div><div class="lbl">Hora Atual</div></div>
+  </div>
+
+  <!-- Feedback -->
+  <div class="feedback" id="feedback">
+    <span class="feedback-icon" id="fbIcon">✅</span>
+    <div><div id="fbTitulo">OK</div><div id="fbDetalhe" style="font-size:0.82rem;font-weight:400;margin-top:2px;"></div></div>
+  </div>
+
+  <!-- TAB FREQUÊNCIA -->
+  <div class="tab-content active" id="tab-frequencia">
+    <div class="card card-scanner">
+      <h2>📷 Leitor de QR Code</h2>
+      <div id="reader"></div>
+      <button class="btn btn-green" id="btnStart" onclick="startScanner()">▶ Iniciar Câmera</button>
+      <button class="btn btn-red" id="btnStop" onclick="stopScanner()" style="display:none;margin-top:8px;">⏹ Parar Câmera</button>
+      <div class="manual-row" style="margin-top:14px;">
+        <input type="text" id="manualId" placeholder="Digitar matrícula..." maxlength="20">
+        <button onclick="registrarManual()">✓ OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB CADASTRO -->
+  <div class="tab-content" id="tab-cadastro">
+    <div class="card card-cadastro">
+      <h2>👤 Cadastrar Novo Aluno</h2>
+      <label>Matrícula *</label>
+      <input type="text" id="cadMatricula" placeholder="Ex: 001" maxlength="20">
+      <label>Nome Completo *</label>
+      <input type="text" id="cadNome" placeholder="Nome do aluno">
+      <label>Turma *</label>
+      <input type="text" id="cadTurma" placeholder="Ex: 9°A">
+      <div class="form-row">
+        <div><label>Turno</label><select id="cadTurno"><option value="Manhã">Manhã</option><option value="Tarde">Tarde</option><option value="Noite">Noite</option></select></div>
+        <div><label>Data Nasc.</label><input type="text" id="cadDataNasc" placeholder="DD/MM/AAAA"></div>
+      </div>
+      <label>Responsável</label>
+      <input type="text" id="cadResponsavel" placeholder="Nome do responsável">
+      <div class="form-row">
+        <div><label>Telefone</label><input type="text" id="cadTelefone" placeholder="(XX) XXXXX-XXXX"></div>
+        <div style="display:flex;align-items:flex-end;"><button class="btn btn-orange" onclick="cadastrarAluno()" style="margin-bottom:10px;">📝 Cadastrar</button></div>
+      </div>
+    </div>
+
+    <!-- Lista de alunos cadastrados -->
+    <div class="card">
+      <h2>📋 Alunos Cadastrados (<span id="totalAlunos">0</span>)</h2>
+      <div class="alunos-lista" id="listaAlunos">
+        <div class="log-empty">Nenhum aluno cadastrado ainda.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Log -->
+  <div class="log-card">
+    <div class="log-header-row">
+      <h2>📋 Registros de Hoje</h2>
+      <span class="badge-count" id="badgeCount">0</span>
+    </div>
+    <div id="logList"><div class="log-empty">Nenhum registro ainda.</div></div>
+    <div class="export-row">
+      <button class="btn-export-csv" onclick="exportarCSV()">⬇ Exportar CSV</button>
+      <button class="btn-clear" onclick="limparLog()">🗑 Limpar</button>
+    </div>
+  </div>
+
+</div>
+
+<footer>SEMED / Junqueiro · Sistema de Frequência v3.0</footer>
+
+<script>
+// ════════════════════════════════════════════
+// VARIÁVEIS GLOBAIS
+// ════════════════════════════════════════════
+let scanner = null, scanning = false, processando = false;
+let registrosHoje = JSON.parse(localStorage.getItem('registrosHoje') || '[]');
+let bancoAlunos = JSON.parse(localStorage.getItem('bancoAlunos') || '{}');
+
+// ════════════════════════════════════════════
+// TABS
+// ════════════════════════════════════════════
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  if (tab === 'cadastro') {
+    document.querySelector('.tab-cad').classList.add('active');
+    document.getElementById('tab-cadastro').classList.add('active');
+    atualizarListaAlunos();
+  } else {
+    document.querySelector('.tab-freq').classList.add('active');
+    document.getElementById('tab-frequencia').classList.add('active');
+  }
+}
+
+// ════════════════════════════════════════════
+// CADASTRAR ALUNO
+// ════════════════════════════════════════════
+async function cadastrarAluno() {
+  const url = document.getElementById('scriptUrl').value.trim();
+  const matricula = document.getElementById('cadMatricula').value.trim();
+  const nome = document.getElementById('cadNome').value.trim();
+  const turma = document.getElementById('cadTurma').value.trim();
+  const turno = document.getElementById('cadTurno').value;
+  const dataNasc = document.getElementById('cadDataNasc').value.trim();
+  const responsavel = document.getElementById('cadResponsavel').value.trim();
+  const telefone = document.getElementById('cadTelefone').value.trim();
+
+  if (!matricula || !nome || !turma) {
+    mostrarFeedback('err', '❌', 'Campos obrigatórios', 'Preencha Matrícula, Nome e Turma.');
+    return;
+  }
+
+  if (bancoAlunos[matricula]) {
+    mostrarFeedback('dup', '⚠️', 'Matrícula já existe', `${bancoAlunos[matricula].nome} já usa essa matrícula.`);
+    return;
+  }
+
+  if (!url) {
+    // Salvar apenas localmente
+    bancoAlunos[matricula] = { nome, turma, turno };
+    localStorage.setItem('bancoAlunos', JSON.stringify(bancoAlunos));
+    mostrarFeedback('ok', '✅', 'Salvo localmente', `${nome} cadastrado (offline). Conecte ao Google Sheets para sincronizar.`);
+    limparFormCadastro();
+    atualizarListaAlunos();
+    return;
+  }
+
+  mostrarFeedback('info', '⏳', 'Cadastrando...', 'Enviando para o Google Sheets...');
+
+  try {
+    const params = new URLSearchParams({
+      action: 'cadastrarAluno', matricula, nome, turma, turno, dataNasc, responsavel, telefone
+    });
+    const resp = await fetch(`${url}?${params.toString()}`);
+    const json = await resp.json();
+
+    if (json.ok) {
+      bancoAlunos[matricula] = { nome, turma, turno };
+      localStorage.setItem('bancoAlunos', JSON.stringify(bancoAlunos));
+      mostrarFeedback('ok', '✅', 'Aluno cadastrado!', `${nome} inserido na planilha (linha ${json.linha}).`);
+      limparFormCadastro();
+      atualizarListaAlunos();
+    } else {
+      mostrarFeedback('err', '❌', 'Erro', json.erro);
+    }
+  } catch (e) {
+    // Salvar localmente em caso de erro
+    bancoAlunos[matricula] = { nome, turma, turno };
+    localStorage.setItem('bancoAlunos', JSON.stringify(bancoAlunos));
+    mostrarFeedback('dup', '⚠️', 'Erro de conexão', `${nome} salvo localmente. Erro: ${e.message}`);
+    limparFormCadastro();
+    atualizarListaAlunos();
+  }
+}
+
+function limparFormCadastro() {
+  ['cadMatricula','cadNome','cadTurma','cadDataNasc','cadResponsavel','cadTelefone'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+}
+
+function atualizarListaAlunos() {
+  const lista = document.getElementById('listaAlunos');
+  const keys = Object.keys(bancoAlunos);
+  document.getElementById('totalAlunos').textContent = keys.length;
+
+  if (keys.length === 0) {
+    lista.innerHTML = '<div class="log-empty">Nenhum aluno cadastrado ainda.</div>';
+    return;
+  }
+
+  lista.innerHTML = keys.map(mat => {
+    const a = bancoAlunos[mat];
+    return `<div class="aluno-item"><div><div class="nome">${a.nome}</div><div class="info">${mat} · ${a.turma} · ${a.turno || ''}</div></div></div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════
+// CARREGAR ALUNOS DA PLANILHA
+// ════════════════════════════════════════════
+async function carregarAlunosDaPlanilha() {
+  const url = document.getElementById('scriptUrl').value.trim();
+  if (!url) { mostrarFeedback('err', '❌', 'Sem URL', 'Cole a URL do Apps Script primeiro.'); return; }
+
+  const status = document.getElementById('alunosStatus');
+  status.style.display = 'block';
+  status.style.background = '#e3f2fd';
+  status.style.color = '#0d47a1';
+  status.textContent = '⏳ Carregando alunos...';
+
+  try {
+    const resp = await fetch(`${url}?action=carregarAlunos`);
+    const json = await resp.json();
+    if (json.ok) {
+      bancoAlunos = json.alunos;
+      localStorage.setItem('bancoAlunos', JSON.stringify(bancoAlunos));
+      status.style.background = '#e8f5e9';
+      status.style.color = '#1b5e20';
+      status.textContent = `✅ ${json.total} alunos carregados da planilha!`;
+      atualizarListaAlunos();
+    } else {
+      status.style.background = '#ffebee';
+      status.style.color = '#b71c1c';
+      status.textContent = '❌ ' + json.erro;
+    }
+  } catch (e) {
+    status.style.background = '#ffebee';
+    status.style.color = '#b71c1c';
+    status.textContent = '❌ Erro de conexão: ' + e.message;
+  }
+}
+
+// ════════════════════════════════════════════
+// SCANNER QR CODE
+// ════════════════════════════════════════════
+function startScanner() {
+  scanner = new Html5Qrcode('reader');
+  scanner.start({ facingMode: 'environment' }, { fps: 10, qrbox: { width: 250, height: 250 } },
+    (text) => { if (!processando) processarLeitura(text.trim()); },
+    () => {}
+  ).then(() => {
+    scanning = true;
+    document.getElementById('btnStart').style.display = 'none';
+    document.getElementById('btnStop').style.display = 'block';
+  }).catch(err => mostrarFeedback('err', '❌', 'Erro na câmera', err.toString()));
+}
+
+function stopScanner() {
+  if (scanner && scanning) {
+    scanner.stop().then(() => {
+      scanning = false;
+      document.getElementById('btnStart').style.display = 'block';
+      document.getElementById('btnStop').style.display = 'none';
+    });
+  }
+}
+
+function registrarManual() {
+  const id = document.getElementById('manualId').value.trim();
+  if (id) { processarLeitura(id); document.getElementById('manualId').value = ''; }
+}
+
+// ════════════════════════════════════════════
+// PROCESSAR LEITURA / REGISTRAR PRESENÇA
+// ════════════════════════════════════════════
+async function processarLeitura(matricula) {
+  if (processando) return;
+  processando = true;
+
+  const hoje = new Date().toLocaleDateString('pt-BR');
+  const hora = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  const turno = document.getElementById('turno').value;
+
+  // Verificar duplicata local
+  if (registrosHoje.find(r => r.matricula === matricula && r.data === hoje)) {
+    mostrarFeedback('dup', '⚠️', 'Já registrado!', `Matrícula ${matricula} já foi registrada hoje.`);
+    processando = false; return;
+  }
+
+  // Buscar dados do aluno
+  let nome = '', turma = '';
+  if (bancoAlunos[matricula]) {
+    nome = bancoAlunos[matricula].nome;
+    turma = bancoAlunos[matricula].turma;
+  } else {
+    mostrarFeedback('err', '❌', 'Aluno não encontrado', `Matrícula ${matricula} não está cadastrada. Cadastre na aba "Cadastrar Aluno".`);
+    processando = false; return;
+  }
+
+  // Enviar para Google Sheets
+  const url = document.getElementById('scriptUrl').value.trim();
+  if (url) {
+    mostrarFeedback('info', '⏳', 'Registrando...', `${nome} — enviando para planilha...`);
+    try {
+      const params = new URLSearchParams({
+        action: 'registrarPresenca', matricula, nome, turma, data: hoje, hora, turno, status: 'Presente'
+      });
+      const resp = await fetch(`${url}?${params.toString()}`);
+      const json = await resp.json();
+      if (!json.ok) {
+        if (json.jaRegistrado) {
+          mostrarFeedback('dup', '⚠️', 'Já registrado!', json.erro);
+        } else {
+          mostrarFeedback('err', '❌', 'Erro', json.erro);
+        }
+        processando = false; return;
+      }
+    } catch (e) {
+      mostrarFeedback('dup', '⚠️', 'Erro de conexão', `Registro salvo localmente. Erro: ${e.message}`);
+    }
+  }
+
+  // Registrar localmente
+  registrosHoje.push({ matricula, nome, turma, data: hoje, hora, turno });
+  localStorage.setItem('registrosHoje', JSON.stringify(registrosHoje));
+  mostrarFeedback('ok', '✅', nome, `${turma} · ${matricula} · ${hora}`);
+  atualizarLog();
+  processando = false;
+}
+
+// ════════════════════════════════════════════
+// FEEDBACK E LOG
+// ════════════════════════════════════════════
+function mostrarFeedback(tipo, icon, titulo, detalhe) {
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback ' + tipo;
+  document.getElementById('fbIcon').textContent = icon;
+  document.getElementById('fbTitulo').textContent = titulo;
+  document.getElementById('fbDetalhe').textContent = detalhe || '';
+  if (tipo === 'ok' || tipo === 'dup') setTimeout(() => { fb.className = 'feedback'; }, 4000);
+}
+
+function atualizarLog() {
+  const list = document.getElementById('logList');
+  const hoje = new Date().toLocaleDateString('pt-BR');
+  const regHoje = registrosHoje.filter(r => r.data === hoje);
+  document.getElementById('statTotal').textContent = regHoje.length;
+  document.getElementById('badgeCount').textContent = regHoje.length;
+
+  if (regHoje.length === 0) { list.innerHTML = '<div class="log-empty">Nenhum registro ainda.</div>'; return; }
+  list.innerHTML = regHoje.slice().reverse().map(r =>
+    `<div class="log-item"><div class="log-avatar">${r.nome.charAt(0)}</div><div><div class="log-name">${r.nome}</div><div class="log-meta">${r.matricula} · ${r.turma}</div></div><div class="log-time">${r.hora}</div></div>`
+  ).join('');
+}
+
+function exportarCSV() {
+  if (registrosHoje.length === 0) return;
+  let csv = 'Matrícula,Nome,Turma,Data,Hora,Turno\n';
+  registrosHoje.forEach(r => { csv += `${r.matricula},"${r.nome}",${r.turma},${r.data},${r.hora},${r.turno}\n`; });
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = `frequencia_${new Date().toISOString().slice(0,10)}.csv`; a.click();
+}
+
+function limparLog() {
+  if (confirm('Limpar todos os registros locais?')) {
+    registrosHoje = []; localStorage.removeItem('registrosHoje'); atualizarLog();
+  }
+}
+
+// ════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════
+function init() {
+  const savedUrl = localStorage.getItem('scriptUrl');
+  if (savedUrl) document.getElementById('scriptUrl').value = savedUrl;
+  document.getElementById('scriptUrl').addEventListener('change', function() {
+    localStorage.setItem('scriptUrl', this.value.trim());
+  });
+
+  setInterval(() => {
+    const now = new Date();
+    document.getElementById('statHora').textContent = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    document.getElementById('statData').textContent = now.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+  }, 1000);
+
+  // Limpar registros de dias anteriores
+  const hoje = new Date().toLocaleDateString('pt-BR');
+  registrosHoje = registrosHoje.filter(r => r.data === hoje);
+  localStorage.setItem('registrosHoje', JSON.stringify(registrosHoje));
+
+  atualizarLog();
+  atualizarListaAlunos();
+
+  document.getElementById('manualId').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') registrarManual();
+  });
+}
+
+init();
+</script>
+</body>
+</html>
